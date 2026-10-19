@@ -1,57 +1,60 @@
-import { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import Services from './components/Services';
-import Doctors from './components/Doctors';
-import Appointment from './components/Appointment';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
+import { useState } from 'react';
+import { AppProvider, useApp } from './contexts/AppContext';
+import Layout from './components/Layout';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Patients from './pages/Patients';
+import Appointments from './pages/Appointments';
+import Consultations from './pages/Consultations';
+import Prescriptions from './pages/Prescriptions';
+import Pharmacy from './pages/Pharmacy';
+import Inventory from './pages/Inventory';
+import Purchases from './pages/Purchases';
+import Billing from './pages/Billing';
+import Reports from './pages/Reports';
+import Staff from './pages/Staff';
+import Documents from './pages/Documents';
+import Settings from './pages/Settings';
 
-function App() {
-  const [activeSection, setActiveSection] = useState('inicio');
+function AppContent() {
+  const { isAuthenticated } = useApp();
+  const [currentPage, setCurrentPage] = useState('dashboard');
 
-  const handleNavigate = (section: string) => {
-    setActiveSection(section);
-    const element = document.getElementById(section);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+  if (!isAuthenticated) {
+    return <Login />;
+  }
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'dashboard': return <Dashboard />;
+      case 'patients': return <Patients />;
+      case 'appointments': return <Appointments />;
+      case 'consultations': return <Consultations />;
+      case 'prescriptions': return <Prescriptions />;
+      case 'pharmacy': return <Pharmacy />;
+      case 'inventory': return <Inventory />;
+      case 'purchases': return <Purchases />;
+      case 'billing': return <Billing />;
+      case 'reports': return <Reports />;
+      case 'staff': return <Staff />;
+      case 'documents': return <Documents />;
+      case 'settings': return <Settings />;
+      default: return <Dashboard />;
     }
   };
 
-  // Track scroll position to update active section
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = ['inicio', 'servicios', 'doctores', 'citas', 'contacto'];
-      const scrollPosition = window.scrollY + 100;
-
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
-            setActiveSection(section);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar activeSection={activeSection} onNavigate={handleNavigate} />
-      <main>
-        <Hero onNavigate={handleNavigate} />
-        <Services />
-        <Doctors />
-        <Appointment />
-        <Contact />
-      </main>
-      <Footer onNavigate={handleNavigate} />
-    </div>
+    <Layout currentPage={currentPage} onNavigate={setCurrentPage}>
+      {renderPage()}
+    </Layout>
+  );
+}
+
+function App() {
+  return (
+    <AppProvider>
+      <AppContent />
+    </AppProvider>
   );
 }
 
